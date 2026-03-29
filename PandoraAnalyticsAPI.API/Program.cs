@@ -6,6 +6,7 @@ using PandoraAnalyticsAPI.Infrastructure.Data;
 using PandoraAnalyticsAPI.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+var enforceHttps = builder.Configuration.GetValue("EnforceHttps", true);
 
 builder.Services.AddControllers();
 
@@ -52,7 +53,10 @@ else
 
 app.UseForwardedHeaders();
 
-app.UseHttpsRedirection();
+if (enforceHttps)
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseRouting();
 
