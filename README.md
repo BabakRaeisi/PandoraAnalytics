@@ -4,7 +4,7 @@ PandoraAnalytics is an ASP.NET Core Web API for collecting and querying player s
 
 ## Tech Stack
 
-- .NET 9 Web API
+- .NET 10 Web API
 - Entity Framework Core
 - PostgreSQL
 - Docker Compose
@@ -63,9 +63,9 @@ This repository includes an AWS-oriented compose file for running behind AWS TLS
 
 1. Launch an EC2 instance (Ubuntu 22.04 is fine).
 2. Open inbound Security Group rules:
-	- `22` (SSH) from your IP
-	- `80` and `443` from internet (if using ALB or reverse proxy)
-	- for direct testing only: `8080` from your IP
+   - `22` (SSH) from your IP
+   - `80` and `443` from internet (if using ALB or reverse proxy)
+   - for direct testing only: `8080` from your IP
 3. Install Docker + Compose plugin on EC2.
 4. Clone this repository on EC2.
 5. Create environment file from template:
