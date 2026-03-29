@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="PandoraAnalyticsAPI.API/PandoraAnalyticsAPI.API.csproj" />
+  <Project Path="PandoraAnalyticsAPI.Application/PandoraAnalyticsAPI.Application.csproj" />
+  <Project Path="PandoraAnalyticsAPI.Domain/PandoraAnalyticsAPI.Domain.csproj" />
+  <Project Path="PandoraAnalyticsAPI.Infrastructure/PandoraAnalyticsAPI.Infrastructure.csproj" />
+</Solution>
