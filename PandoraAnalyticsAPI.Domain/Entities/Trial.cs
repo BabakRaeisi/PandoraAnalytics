@@ -9,9 +9,9 @@ namespace PandoraAnalyticsAPI.Domain.Entities
         public int Id { get; set; }
 
         public int SessionId { get; set; }
-        public Session Session { get; set; }    
+        public Session Session { get; set; } = null!;
 
-        public string Minigame { get; set; }
+        public string Minigame { get; set; } = string.Empty;
         public int Day { get; set; }
         public int TrialIndex { get; set; }
 
@@ -21,7 +21,7 @@ namespace PandoraAnalyticsAPI.Domain.Entities
 
         public DateTime Timestamp { get; set; }
 
-        public string TargetSequenceJson { get; set; }   
+        public string TargetSequenceJson { get; set; } = string.Empty;
 
     }
 }

@@ -1,6 +1,11 @@
-@PandoraAnalyticsAPI.API_HostAddress = http://localhost:5141
+@PandoraAnalyticsAPI.API_HostAddress = https://localhost:5001
 
-GET {{PandoraAnalyticsAPI.API_HostAddress}}/weatherforecast/
+GET {{PandoraAnalyticsAPI.API_HostAddress}}/health
+Accept: application/json
+
+###
+
+GET {{PandoraAnalyticsAPI.API_HostAddress}}/api/analytics/players
 Accept: application/json
 
 ###

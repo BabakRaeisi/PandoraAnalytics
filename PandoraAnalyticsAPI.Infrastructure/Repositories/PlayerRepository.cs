@@ -19,12 +19,22 @@ namespace PandoraAnalyticsAPI.Infrastructure.Repositories
 
       public async Task<List<Player>> GetAllAsync()
 {
-    return await _context.Players.ToListAsync();
+    return await _context.Players.AsNoTracking().ToListAsync();
 }
 
 public async Task<Player?> GetByIdAsync(string playerId)
 {
     return await _context.Players
+        .AsNoTracking()
+        .FirstOrDefaultAsync(p => p.PlayerId == playerId);
+}
+
+public async Task<Player?> GetByIdWithSessionsAndTrialsAsync(string playerId)
+{
+    return await _context.Players
+        .AsNoTracking()
+        .Include(p => p.Sessions)
+        .ThenInclude(s => s.Trials)
         .FirstOrDefaultAsync(p => p.PlayerId == playerId);
 }
 
@@ -43,6 +53,7 @@ public async Task<Player?> GetByIdAsync(string playerId)
         public async Task<List<Player>> GetAllWithSessionsAndTrialsAsync()
         {
             return await _context.Players
+                .AsNoTracking()
                 .Include(p => p.Sessions)
                 .ThenInclude(s => s.Trials)
                 .ToListAsync();

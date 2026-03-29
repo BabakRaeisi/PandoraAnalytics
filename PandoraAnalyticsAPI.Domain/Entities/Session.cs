@@ -9,8 +9,8 @@ namespace PandoraAnalyticsAPI.Domain.Entities
 
         public int Id { get; set; }
 
-        public string PlayerId { get; set; }
-        public Player Player { get; set; }    
+    public string PlayerId { get; set; } = string.Empty;
+    public Player Player { get; set; } = null!;
 
         public int Day { get; set; }
         public DateTime CompletedAt { get; set; }
@@ -25,7 +25,7 @@ namespace PandoraAnalyticsAPI.Domain.Entities
         public bool ProgramCompleted { get; set; }
         public bool ProfileCompleted { get; set; }
 
-        public string LastDayCompletionTime { get; set; }
+        public string LastDayCompletionTime { get; set; } = string.Empty;
 
         public List<Trial> Trials { get; set; } = new();
 

@@ -1,6 +1,7 @@
 ﻿using PandoraAnalyticsAPI.Application.DTOs;
 using PandoraAnalyticsAPI.Application.Interfaces;
 using PandoraAnalyticsAPI.Domain.Entities;
+using System.Globalization;
 using System.Text.Json;
 
 namespace PandoraAnalyticsAPI.Application.Services
@@ -39,11 +40,33 @@ namespace PandoraAnalyticsAPI.Application.Services
                 trial.Day,
                 trial.TrialIndex,
                 trial.Span,
-                JsonSerializer.Deserialize<List<int>>(trial.TargetSequenceJson) ?? new(),
+                DeserializeTargetSequenceSafe(trial.TargetSequenceJson),
                 trial.WrongAttempts,
                 trial.CompletionTimeMs,
                 trial.Timestamp.ToString("o")
             );
+        }
+
+        private static List<int> DeserializeTargetSequenceSafe(string targetSequenceJson)
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<List<int>>(targetSequenceJson) ?? new();
+            }
+            catch (JsonException)
+            {
+                return new();
+            }
+        }
+
+        private static DateTime ParseTimestampUtc(string timestampIso)
+        {
+            if (DateTimeOffset.TryParse(timestampIso, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed))
+            {
+                return parsed.UtcDateTime;
+            }
+
+            return DateTime.UtcNow;
         }
 
         private static SessionDetail MapSessionDetail(Session session)
@@ -102,8 +125,8 @@ namespace PandoraAnalyticsAPI.Application.Services
 
             await _playerRepo.UpdateAsync(existingPlayer);
 
-            var fullPlayer = (await _playerRepo.GetAllWithSessionsAndTrialsAsync())
-                .First(p => p.PlayerId == profile.phoneNumber);
+            var fullPlayer = await _playerRepo.GetByIdWithSessionsAndTrialsAsync(profile.phoneNumber)
+                ?? throw new InvalidOperationException("Player was not found after profile update.");
 
             return new ProfileRestoreResponse(true, MapPlayerFullData(fullPlayer));
         }
@@ -169,7 +192,7 @@ namespace PandoraAnalyticsAPI.Application.Services
                 Span = t.span,
                 WrongAttempts = t.wrong_attempts,
                 CompletionTimeMs = t.completion_time_ms,
-                Timestamp = DateTime.Parse(t.timestamp_iso).ToUniversalTime(),
+                Timestamp = ParseTimestampUtc(t.timestamp_iso),
                 TargetSequenceJson = JsonSerializer.Serialize(t.target_sequence)
             }).ToList();
 

@@ -25,6 +25,7 @@ public class SessionRepository : ISessionRepository
     public async Task<List<Session>> GetByPlayerIdAsync(string playerId)
     {
         return await _context.Sessions
+            .AsNoTracking()
             .Include(s => s.Player) // REQUIRED
             .Where(s => s.PlayerId == playerId)
             .OrderBy(s => s.Id)
@@ -34,6 +35,7 @@ public class SessionRepository : ISessionRepository
     public async Task<Session?> GetByIdAsync(int sessionId)
     {
         return await _context.Sessions
+            .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == sessionId);
     }
 }

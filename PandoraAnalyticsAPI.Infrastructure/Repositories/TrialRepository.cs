@@ -27,6 +27,7 @@ namespace PandoraAnalyticsAPI.Infrastructure.Repositories
         public async Task<List<Trial>> GetAllAsync()
         {
             return await _context.Trials
+                .AsNoTracking()
                 .OrderBy(t => t.Id)
                 .ToListAsync();
         }
@@ -34,6 +35,7 @@ namespace PandoraAnalyticsAPI.Infrastructure.Repositories
         public async Task<List<Trial>> GetBySessionIdAsync(int sessionId)
         {
             return await _context.Trials
+                .AsNoTracking()
                 .Where(t => t.SessionId == sessionId)
                 .OrderBy(t => t.TrialIndex)
                 .ToListAsync();
@@ -42,6 +44,7 @@ namespace PandoraAnalyticsAPI.Infrastructure.Repositories
         public async Task<List<Trial>> GetByPlayerIdAsync(string playerId)
         {
             return await _context.Trials
+                .AsNoTracking()
                 .Where(t => t.Session.PlayerId == playerId)
                 .OrderBy(t => t.Day)
                 .ThenBy(t => t.TrialIndex)
@@ -51,6 +54,7 @@ namespace PandoraAnalyticsAPI.Infrastructure.Repositories
         public async Task<List<Trial>> GetByMinigameAsync(string minigame)
         {
             return await _context.Trials
+                .AsNoTracking()
                 .Where(t => t.Minigame == minigame)
                 .ToListAsync();
         }
@@ -58,6 +62,7 @@ namespace PandoraAnalyticsAPI.Infrastructure.Repositories
         public async Task<Trial?> GetByIdAsync(int trialId)
         {
             return await _context.Trials
+                .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Id == trialId);
         }
     }
