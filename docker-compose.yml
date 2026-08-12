@@ -28,6 +28,8 @@ services:
       ASPNETCORE_URLS: http://+:8080
       EnforceHttps: "false"
       ConnectionStrings__DefaultConnection: "Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      GoogleSheets__WebhookUrl: ${GOOGLE_SHEETS_WEBHOOK_URL}
+      GoogleSheets__Secret: ${GOOGLE_SHEETS_WEBHOOK_SECRET}
     expose:
       - "8080"
     restart: unless-stopped
