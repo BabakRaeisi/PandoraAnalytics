@@ -25,15 +25,30 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: https://+:5001
-      ASPNETCORE_Kestrel__Certificates__Default__Path: /https/tls.pfx
-      ASPNETCORE_Kestrel__Certificates__Default__Password: ${TLS_CERT_PASSWORD}
-      ConnectionStrings__DefaultConnection: Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      ASPNETCORE_URLS: http://+:8080
+      EnforceHttps: "false"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+    expose:
+      - "8080"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: pandora-caddy
+    depends_on:
+      - api
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
     ports:
-      - "5001:5001"
+      - "80:80"
+      - "443:443"
     volumes:
-      - ${TLS_CERT_PATH}:/https/tls.pfx:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
     restart: unless-stopped
 
 volumes:
   postgres-data:
+  caddy-data:
+  caddy-config:
