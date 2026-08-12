@@ -4,7 +4,7 @@ using PandoraAnalyticsAPI.Application.Interfaces;
 using PandoraAnalyticsAPI.Application.Services;
 using PandoraAnalyticsAPI.Infrastructure.Data;
 using PandoraAnalyticsAPI.Infrastructure.Repositories;
-
+using PandoraAnalyticsAPI.Infrastructure.Services;
 var builder = WebApplication.CreateBuilder(args);
 var enforceHttps = builder.Configuration.GetValue("EnforceHttps", true);
 
@@ -17,6 +17,7 @@ builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<ITrialRepository, TrialRepository>();
 builder.Services.AddScoped<ILevelPlayRepository, LevelPlayRepository>();
+builder.Services.AddHttpClient<IGoogleSheetsService, GoogleSheetsService>();
 builder.Services.AddScoped<AnalyticsService>();
 
 builder.Services.AddEndpointsApiExplorer();

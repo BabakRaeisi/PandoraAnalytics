@@ -11,5 +11,8 @@ namespace PandoraAnalyticsAPI.Application.Interfaces
         Task<List<LevelPlay>> GetByPlayerIdAsync(string playerId);
 
         Task<List<LevelPlay>> GetAllAsync();
+        Task<LevelPlay?> GetByEventIdAsync(string eventId);
+
+Task MarkSheetSyncedAsync(LevelPlay levelPlay);
     }
 }

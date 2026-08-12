@@ -11,17 +11,20 @@ namespace PandoraAnalyticsAPI.Application.Services
         private readonly IPlayerRepository _playerRepo;
         private readonly ISessionRepository _sessionRepo;
         private readonly ITrialRepository _trialRepo;
+        private readonly IGoogleSheetsService _googleSheetsService;
 private readonly ILevelPlayRepository _levelPlayRepo;
-     public AnalyticsService(
+   public AnalyticsService(
     IPlayerRepository playerRepo,
     ISessionRepository sessionRepo,
     ITrialRepository trialRepo,
-    ILevelPlayRepository levelPlayRepo)
+    ILevelPlayRepository levelPlayRepo,
+    IGoogleSheetsService googleSheetsService)
 {
     _playerRepo = playerRepo;
     _sessionRepo = sessionRepo;
     _trialRepo = trialRepo;
     _levelPlayRepo = levelPlayRepo;
+    _googleSheetsService = googleSheetsService;
 }
 
         private static PlayerProfile MapPlayerProfile(Player player)
@@ -203,10 +206,8 @@ private readonly ILevelPlayRepository _levelPlayRepo;
         public async Task HandleLevelCompletion(
     LevelCompletionRequest request)
 {
-    // Unity may retry the same queued report.
-    // If we already saved it, treat that as success.
-    if (await _levelPlayRepo.ExistsByEventIdAsync(request.eventId))
-        return;
+    var levelPlay =
+        await _levelPlayRepo.GetByEventIdAsync(request.eventId);
 
     var player =
         await _playerRepo.GetByIdAsync(request.playerId);
@@ -218,30 +219,58 @@ private readonly ILevelPlayRepository _levelPlayRepo;
         );
     }
 
-    var levelPlay = new LevelPlay
+    // First time receiving this event: save it to PostgreSQL.
+    if (levelPlay == null)
     {
-        EventId = request.eventId,
-        PlayerId = request.playerId,
+        levelPlay = new LevelPlay
+        {
+            EventId = request.eventId,
+            PlayerId = request.playerId,
 
-        Minigame = request.minigame,
-        LevelNumber = request.levelNumber,
+            Minigame = request.minigame,
+            LevelNumber = request.levelNumber,
 
-        SuccessfulTrials = request.successfulTrials,
-        RequiredTrials = request.requiredTrials,
+            SuccessfulTrials = request.successfulTrials,
+            RequiredTrials = request.requiredTrials,
 
-        NormalPass = request.normalPass,
-        AssistedPass = request.assistedPass,
+            NormalPass = request.normalPass,
+            AssistedPass = request.assistedPass,
 
-        ActiveDurationMs = request.activeDurationMs,
+            ActiveDurationMs = request.activeDurationMs,
 
-        StartedAtUtc =
-            ParseTimestampUtc(request.startedAtUtc),
+            StartedAtUtc =
+                ParseTimestampUtc(request.startedAtUtc),
 
-        CompletedAtUtc =
-            ParseTimestampUtc(request.completedAtUtc)
-    };
+            CompletedAtUtc =
+                ParseTimestampUtc(request.completedAtUtc),
 
-    await _levelPlayRepo.AddAsync(levelPlay);
+            SheetSynced = false
+        };
+
+        await _levelPlayRepo.AddAsync(levelPlay);
+    }
+
+    // Already reached Google Sheets previously.
+    if (levelPlay.SheetSynced)
+        return;
+
+    var sheetSuccess =
+        await _googleSheetsService.SendLevelPlayAsync(
+            levelPlay,
+            player.Name
+        );
+
+    if (!sheetSuccess)
+    {
+        // PostgreSQL already has the report.
+        // Returning an error makes Unity keep it in OfflineQueue
+        // and retry later.
+        throw new InvalidOperationException(
+            $"Google Sheets sync failed for event '{levelPlay.EventId}'."
+        );
+    }
+
+    await _levelPlayRepo.MarkSheetSyncedAsync(levelPlay);
 }
         // ---------------- READ ----------------
         public async Task<List<PlayerProfile>> GetPlayers()

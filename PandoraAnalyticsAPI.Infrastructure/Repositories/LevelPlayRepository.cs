@@ -40,5 +40,17 @@ namespace PandoraAnalyticsAPI.Infrastructure.Repositories
                 .OrderBy(x => x.CompletedAtUtc)
                 .ToListAsync();
         }
+
+   public async Task<LevelPlay?> GetByEventIdAsync(string eventId)
+{
+    return await _context.LevelPlays
+        .FirstOrDefaultAsync(x => x.EventId == eventId);
+}
+
+public async Task MarkSheetSyncedAsync(LevelPlay levelPlay)
+{
+    levelPlay.SheetSynced = true;
+    await _context.SaveChangesAsync();
+}
     }
 }
