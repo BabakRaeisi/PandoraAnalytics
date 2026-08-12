@@ -11,6 +11,7 @@ namespace PandoraAnalyticsAPI.Infrastructure.Data
         public DbSet<Player> Players => Set<Player>();
         public DbSet<Session> Sessions => Set<Session>();
         public DbSet<Trial> Trials => Set<Trial>();
+        public DbSet<LevelPlay> LevelPlays => Set<LevelPlay>();
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
@@ -30,6 +31,16 @@ namespace PandoraAnalyticsAPI.Infrastructure.Data
                 .HasOne(t => t.Session)
                 .WithMany(s => s.Trials)
                 .HasForeignKey(t => t.SessionId);
+
+            modelBuilder.Entity<LevelPlay>()
+    .HasIndex(x => x.EventId)
+    .IsUnique();
+
+modelBuilder.Entity<LevelPlay>()
+    .HasOne(x => x.Player)
+    .WithMany()
+    .HasForeignKey(x => x.PlayerId)
+    .HasPrincipalKey(p => p.PlayerId);
         }
     }
 }

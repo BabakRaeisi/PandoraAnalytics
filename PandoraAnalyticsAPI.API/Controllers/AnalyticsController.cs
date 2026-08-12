@@ -28,6 +28,14 @@ namespace PandoraAnalyticsAPI.API.Controllers
         {
             return Ok(await _service.CreateOrRestoreProfile(profile));
         }
+        [HttpPost("level-completed")]
+public async Task<IActionResult> LevelCompleted(
+    [FromBody] LevelCompletionRequest request)
+{
+    await _service.HandleLevelCompletion(request);
+
+    return Ok();
+}
 
         // -------- READ --------
         [HttpGet("players")]

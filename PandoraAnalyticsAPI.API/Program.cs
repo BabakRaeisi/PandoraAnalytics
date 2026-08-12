@@ -16,7 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<ITrialRepository, TrialRepository>();
-
+builder.Services.AddScoped<ILevelPlayRepository, LevelPlayRepository>();
 builder.Services.AddScoped<AnalyticsService>();
 
 builder.Services.AddEndpointsApiExplorer();

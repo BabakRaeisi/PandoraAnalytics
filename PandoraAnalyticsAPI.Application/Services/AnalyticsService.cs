@@ -11,16 +11,18 @@ namespace PandoraAnalyticsAPI.Application.Services
         private readonly IPlayerRepository _playerRepo;
         private readonly ISessionRepository _sessionRepo;
         private readonly ITrialRepository _trialRepo;
-
-        public AnalyticsService(
-            IPlayerRepository playerRepo,
-            ISessionRepository sessionRepo,
-            ITrialRepository trialRepo)
-        {
-            _playerRepo = playerRepo;
-            _sessionRepo = sessionRepo;
-            _trialRepo = trialRepo;
-        }
+private readonly ILevelPlayRepository _levelPlayRepo;
+     public AnalyticsService(
+    IPlayerRepository playerRepo,
+    ISessionRepository sessionRepo,
+    ITrialRepository trialRepo,
+    ILevelPlayRepository levelPlayRepo)
+{
+    _playerRepo = playerRepo;
+    _sessionRepo = sessionRepo;
+    _trialRepo = trialRepo;
+    _levelPlayRepo = levelPlayRepo;
+}
 
         private static PlayerProfile MapPlayerProfile(Player player)
         {
@@ -198,7 +200,49 @@ namespace PandoraAnalyticsAPI.Application.Services
 
             await _trialRepo.AddRangeAsync(trials);
         }
+        public async Task HandleLevelCompletion(
+    LevelCompletionRequest request)
+{
+    // Unity may retry the same queued report.
+    // If we already saved it, treat that as success.
+    if (await _levelPlayRepo.ExistsByEventIdAsync(request.eventId))
+        return;
 
+    var player =
+        await _playerRepo.GetByIdAsync(request.playerId);
+
+    if (player == null)
+    {
+        throw new InvalidOperationException(
+            $"Player '{request.playerId}' does not exist."
+        );
+    }
+
+    var levelPlay = new LevelPlay
+    {
+        EventId = request.eventId,
+        PlayerId = request.playerId,
+
+        Minigame = request.minigame,
+        LevelNumber = request.levelNumber,
+
+        SuccessfulTrials = request.successfulTrials,
+        RequiredTrials = request.requiredTrials,
+
+        NormalPass = request.normalPass,
+        AssistedPass = request.assistedPass,
+
+        ActiveDurationMs = request.activeDurationMs,
+
+        StartedAtUtc =
+            ParseTimestampUtc(request.startedAtUtc),
+
+        CompletedAtUtc =
+            ParseTimestampUtc(request.completedAtUtc)
+    };
+
+    await _levelPlayRepo.AddAsync(levelPlay);
+}
         // ---------------- READ ----------------
         public async Task<List<PlayerProfile>> GetPlayers()
         {
